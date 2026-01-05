@@ -1,0 +1,69 @@
+15:27:26 - INFO     - 
+🔍 Checking server health...
+15:27:26 - INFO     - ✅ Server is healthy!
+15:29:30 - INFO     - 
+🔍 Checking server health...
+15:29:30 - INFO     - ✅ Server is healthy!
+15:32:34 - INFO     - 
+🔍 Checking server health...
+15:32:34 - INFO     - ✅ Server is healthy!
+15:33:16 - INFO     - 
+🔍 Checking server health...
+15:33:16 - INFO     - ✅ Server is healthy!
+15:33:18 - INFO     - 🧪 STARTING TESTS
+15:33:18 - ERROR    - 
+❌ TEST FAILED:  TestSuite.test_root() takes 1 positional argument but 2 were given
+16:03:26 - INFO     - 
+🔍 Checking server health...
+16:03:26 - INFO     - ✅ Server is healthy!
+16:03:29 - INFO     - 🧪 STARTING TESTS
+16:03:29 - INFO     - TEST: GET /
+16:03:29 - INFO     - ✅ PASSED
+16:03:29 - INFO     - TEST: GET /debug
+16:03:29 - INFO     - ✅ PASSED
+16:03:29 - INFO     - TEST: POST /upload
+16:03:29 - INFO     - Created test file: test_model.tflite (1600 bytes)
+16:03:29 - INFO     - ✅ PASSED
+16:03:29 - INFO     - TEST: POST /generate
+16:03:29 - INFO     - ✅ PASSED
+16:03:29 - INFO     - TEST: GET /outputs/20260104_160329
+16:03:29 - INFO     - ✅ PASSED
+16:03:29 - INFO     - TEST: GET /download/20260104_160329/{'name': 'test_network.c', 'size': 19, 'download_url': '/download/20260104_160329/test_network.c'}
+16:03:29 - ERROR    - 
+❌ TEST FAILED:  
+16:04:27 - INFO     - 
+🔍 Checking server health...
+16:04:27 - INFO     - ✅ Server is healthy!
+16:04:29 - INFO     - 🧪 STARTING TESTS
+16:04:29 - INFO     - TEST: GET /
+16:04:29 - INFO     - ✅ PASSED
+16:04:29 - INFO     - TEST: GET /debug
+16:04:29 - INFO     - ✅ PASSED
+16:04:29 - INFO     - TEST: POST /upload
+16:04:29 - INFO     - Created test file: test_model.tflite (1600 bytes)
+16:04:29 - INFO     - ✅ PASSED
+16:04:29 - INFO     - TEST: POST /generate
+16:04:29 - INFO     - ✅ PASSED
+16:04:29 - INFO     - TEST: GET /outputs/20260104_160429
+16:04:29 - INFO     - ✅ PASSED
+16:04:29 - INFO     - TEST: GET /download/20260104_160429/{'name': 'test_network.c', 'size': 19, 'download_url': '/download/20260104_160429/test_network.c'}
+16:04:29 - ERROR    - 
+❌ TEST FAILED:  
+16:10:50 - INFO     - 
+🔍 Checking server health...
+16:10:50 - INFO     - ✅ Server is healthy!
+16:10:58 - INFO     - 🧪 STARTING TESTS
+16:10:58 - INFO     - TEST: GET /
+16:10:58 - INFO     - ✅ PASSED
+16:10:58 - INFO     - TEST: GET /debug
+16:10:58 - INFO     - ✅ PASSED
+16:10:58 - INFO     - TEST: POST /upload
+16:10:58 - INFO     - Created test file: test_model.tflite (1600 bytes)
+16:10:58 - INFO     - ✅ PASSED
+16:10:58 - INFO     - TEST: POST /generate
+16:10:58 - INFO     - ✅ PASSED
+16:10:58 - INFO     - TEST: GET /outputs/20260104_161058
+16:10:58 - INFO     - ✅ PASSED
+16:10:58 - INFO     - TEST: GET /download/20260104_161058/{'name': 'test_network.c', 'size': 19, 'download_url': '/download/20260104_161058/test_network.c'}
+16:10:58 - ERROR    - 
+❌ TEST FAILED:  
