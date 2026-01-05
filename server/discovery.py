@@ -21,13 +21,31 @@ def discovery_server():
       Server responds (unicast):  {"service": "stedgeai-api", "ip": "192.168.1.100", "port": 5000}
     """
     
-   
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    
+    # Try to enable SO_REUSEPORT if available (helps on some platforms)
+    try:
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+    except (AttributeError, OSError):
+        pass  # Not available on Windows
         
-    # Bind to discovery port
-    sock.bind(('', 5001))
-        
+    # Try to bind to discovery port, with fallback ports
+    discovery_port = 5001
+    ports_to_try = [5001, 5002, 5003, 5004, 5005]
+    
+    for port in ports_to_try:
+        try:
+            sock.bind(('', port))
+            discovery_port = port
+            logger.info(f"✅ Discovery server bound to port {port}")
+            break
+        except OSError as e:
+            logger.warning(f"⚠️ Could not bind to port {port}: {e}")
+            if port == ports_to_try[-1]:
+                logger.error("❌ Failed to bind to any discovery port. Discovery service unavailable.")
+                return
+    
     local_ip = get_local_ip()
 
     while True:

@@ -16,25 +16,44 @@ def discover_server(timeout=DISCOVERY_TIMEOUT,retries=DISCOVERY_RETRIES):
     sock.settimeout(timeout)
 
     request = {"action": "discover", "service": SERVICE_NAME}
+    discovery_ports = [5001, 5002, 5003, 5004, 5005]
+    
     for attempt in range(retries):
-        try:
-            sock.sendto(
-                json.dumps(request).encode(), ('<broadcast>', 5001)  
-            )
-            data, addr = sock.recvfrom(1024)
-            response = json.loads(data.decode())
-            
-            if response.get("service") == SERVICE_NAME:
-                SERVER_URL = f"http://{response['ip']}:{response['port']}"
-                print(f"✅ Discovered server at {SERVER_URL}")
-
-                sock.close()
-                return SERVER_URL
-            
-        except socket.timeout:
-            logger.error(f"⚠️  No response, retrying... ({attempt + 1}/{retries})")
-            if attempt < retries:
-                time.sleep(1)
+        logger.info(f"🔍 Discovery attempt {attempt + 1}/{retries}")
+        
+        # Try all discovery ports in each attempt
+        for port in discovery_ports:
+            try:
+                logger.debug(f"   Broadcasting to port {port}...")
+                sock.sendto(
+                    json.dumps(request).encode(), ('<broadcast>', port)  
+                )
+                
+                # Wait for response with short timeout per port
+                try:
+                    data, addr = sock.recvfrom(1024)
+                    response = json.loads(data.decode())
+                    
+                    if response.get("service") == SERVICE_NAME:
+                        SERVER_URL = f"http://{response['ip']}:{response['port']}"
+                        logger.info(f"✅ Discovered server at {SERVER_URL} (via port {port})")
+                        sock.close()
+                        return SERVER_URL
+                        
+                except socket.timeout:
+                    # No response on this port, try next port
+                    continue
+                    
+            except Exception as e:
+                logger.debug(f"   Error on port {port}: {e}")
+                continue
+        
+        # If no server found after trying all ports, wait before next retry
+        if attempt < retries - 1:
+            logger.warning(f"⚠️  No response on any port, retrying in 1 second...")
+            time.sleep(1)
+    
+    logger.error("❌ Could not discover server after all retries")
     sock.close()
     return None
 

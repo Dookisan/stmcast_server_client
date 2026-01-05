@@ -8,7 +8,7 @@ from datetime import datetime
 from config import UPLOAD_DIR, OUTPUT_DIR, GenerateRequest
 from discovery import discovery_server, get_local_ip
 from utils.format import print_request_start, print_request_end
-from utils.stedgeai_finder import STEdgeAIFinder
+from server.utils.finder import STEdgeAIFinder
 
 logger = logging.getLogger(__name__)
 
