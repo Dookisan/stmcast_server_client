@@ -8,5 +8,8 @@ wheels/
 
 # Virtual environments
 .venv
-.c
-.h
+*.c
+*.h
+*.tflite
+*.txt
+*.json

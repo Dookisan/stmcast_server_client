@@ -8,6 +8,8 @@ OUTPUT_DIR = Path('./outputs')
 UPLOAD_DIR.mkdir(exist_ok=True)
 OUTPUT_DIR.mkdir(exist_ok=True)
 
+CONFIG_DIR = Path('./config')
+CONFIG_DIR.mkdir(exist_ok=True)
 # ============================================================================
 # MODELS
 # ============================================================================

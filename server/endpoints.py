@@ -8,7 +8,8 @@ from datetime import datetime
 from config import UPLOAD_DIR, OUTPUT_DIR, GenerateRequest
 from discovery import discovery_server, get_local_ip
 from utils.format import print_request_start, print_request_end
-from server.utils.finder import STEdgeAIFinder
+from utils.finder import FilesystemFinder
+from utils.stedgeai import STEdgeAI
 
 logger = logging.getLogger(__name__)
 
@@ -40,8 +41,15 @@ async def lifespan(app: FastAPI):
     
     # START STEDGEAI FINDER THREAD
     logger.info("🔎 Starting stedgeai finder thread...")
-    STEDGEAI_FINDER = STEdgeAIFinder()
-    finder_thread = threading.Thread(target=STEDGEAI_FINDER.find, daemon=True)
+    STEDGEAI_FINDER = FilesystemFinder
+
+    finder = FilesystemFinder(
+        "stedgeai.exe",
+        validator=lambda p:  p.stat().st_size > 100_000
+    )
+    path = finder.find()
+
+    finder_thread = threading.Thread(target=finder.find, daemon=True)
     finder_thread.start()
     yield  
     
@@ -115,12 +123,11 @@ async def upload(file: UploadFile = File(...)):
     logger.debug(f"🔵 Read {len(content)} bytes")
     
     # Generate filename
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    unique_name = f"{timestamp}_{file.filename}"
-    logger.debug(f"🔵 Generated unique filename: {unique_name}")
+    
+    logger.debug(f"🔵 Generated unique filename: {file.filename}")
     
     # Build path
-    filepath = UPLOAD_DIR / unique_name
+    filepath = UPLOAD_DIR / file.filename
     logger.debug(f"🔵 Full path: {filepath}")
     logger.debug(f"🔵 Absolute path: {filepath.absolute()}")
     
@@ -132,7 +139,7 @@ async def upload(file: UploadFile = File(...)):
     
     # Response
     response = {
-        "filename": unique_name,
+        "filename": file.filename,
         "size": len(content),
         "path": str(filepath.absolute())
     }
@@ -178,30 +185,51 @@ def generate(request: GenerateRequest):
     
     logger.info(f"✅ File found!")
     
+    prefix = "err_seq_"
+    logger.debug(f"🔵 Extracting number from filename: {request.filename}")
+    nn_number = ''.join(filter(str.isdigit, request.filename))
+    logger.debug(f"🔵 Extracted number: '{nn_number}'")
+    nn_name = f"{prefix}{nn_number}"
+
     # Create job
     job_id = datetime.now().strftime('%Y%m%d_%H%M%S')
     logger.debug(f"🔵 Generated job_id: {job_id}")
     
-    output_dir = OUTPUT_DIR / job_id
+    output_dir = OUTPUT_DIR / nn_name
     logger.debug(f"🔵 output_dir:  {output_dir}")
     logger.debug(f"🔵 Creating directory...")
     output_dir.mkdir(parents=True, exist_ok=True)
     logger.info(f"✅ Directory created!")
     
     # Simulate stedgeai (ohne wirklich auszuführen)
-    logger.debug(f"🔵 Would run stedgeai here...")
-    logger.debug(f"   Command: stedgeai generate -m {model_path} --target {request.target} -n {request.name} -o {output_dir}")
+    logger.debug(f"🔵 Initialise stedgeai ...")
+
+    if not nn_number:
+        logger.warning(f"⚠️ No number found in filename '{request.filename}', using default '0'")
+        nn_number = "0"
     
-    # Create dummy files
-    logger.debug(f"🔵 Creating dummy output files...")
-    (output_dir / f"{request.name}.c").write_text("// Generated C code")
-    (output_dir / f"{request.name}.h").write_text("// Generated header")
-    logger.info(f"✅ Dummy files created!")
+    
+    logger.debug(f"🔵 Generated network name: {nn_name}")
+    
+    stedgeai = STEdgeAI(model_file=model_path, network=nn_name, output_dir=output_dir)
+    
+    # Run stedgeai generate
+    logger.debug(f"🔵 Running stedgeai generate...")
+    logger.debug(f"🔵 Output will be saved to: {output_dir}")
+    success = stedgeai.generate_model()
+    
+    if not success:
+        logger.error(f"❌ stedgeai generation failed!")
+        print_request_end("/generate")
+        raise HTTPException(status_code=500, detail="Model generation failed")
+    
+    logger.info(f"✅ stedgeai generation completed!")
+    logger.info(f"✅ Files saved to {output_dir}")
     
     # Response
     response = {
         "success": True,
-        "job_id": job_id,
+        "name": nn_name,
         "output_dir": str(output_dir)
     }
     logger.debug(f"🔵 Response: {response}")
