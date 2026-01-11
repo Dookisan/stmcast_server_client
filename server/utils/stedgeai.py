@@ -62,8 +62,17 @@ class STEdgeAI:
         return stedgeai_path
 
     def set_workspace_path(self) -> str:
-        with open(CONFIG_DIR/"workspace_1_16_1.json","r") as f:
+        with open(CONFIG_DIR/"BSC.json","r") as f:
             config = json.load(f)
             workspace_path = config.get("path", "").strip()
 
         return workspace_path
+
+
+def set_workspace_path() -> Path:
+    """Module-level helper: returns the workspace path from BSC.json as a Path."""
+    with open(CONFIG_DIR/"BSC.json", "r") as f:
+        config = json.load(f)
+        workspace_path = config.get("path", "").strip()
+
+    return Path(workspace_path)

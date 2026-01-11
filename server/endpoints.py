@@ -7,9 +7,10 @@ import threading
 from datetime import datetime
 from config import UPLOAD_DIR, OUTPUT_DIR, GenerateRequest
 from discovery import discovery_server, get_local_ip
-from utils.format import print_request_start, print_request_end
+from utils.format import print_request_start, print_request_end, print_ascii
 from utils.finder import FilesystemFinder
 from utils.stedgeai import STEdgeAI
+from utils.stedgeai import set_workspace_path
 
 logger = logging.getLogger(__name__)
 
@@ -47,10 +48,26 @@ async def lifespan(app: FastAPI):
         "stedgeai.exe",
         validator=lambda p:  p.stat().st_size > 100_000
     )
-    path = finder.find()
 
     finder_thread = threading.Thread(target=finder.find, daemon=True)
     finder_thread.start()
+
+#---- START WORKSPACE FINDER THREAD
+    logger.info("🔎 Starting workspace_1_16_1 finder thread...")
+    finder_work = FilesystemFinder(
+        "BSC",
+        is_dir=True
+    )
+
+    finder_thread = threading.Thread(target=finder_work.find, daemon=True)
+    finder_thread.start()
+
+    print(f"{80*'='}\n")
+    print("STM Cast Auto Updater - Server\n")
+    print("Hey there, Developer! The Server is ready to use :)")
+    print_ascii()
+    print(f"{80*'='}\n")
+
     yield  
     
     # ===== SHUTDOWN =====
@@ -200,9 +217,10 @@ def generate(request: GenerateRequest):
     logger.debug(f"🔵 Creating directory...")
     output_dir.mkdir(parents=True, exist_ok=True)
     logger.info(f"✅ Directory created!")
-    
-    # Simulate stedgeai (ohne wirklich auszuführen)
-    logger.debug(f"🔵 Initialise stedgeai ...")
+
+    x_cube_ai = set_workspace_path()
+    x_cube_ai_app = x_cube_ai /"X-CUBE-AI"/"App"
+    logger.debug(f"🔵 workspace path:  {x_cube_ai_app}")
 
     if not nn_number:
         logger.warning(f"⚠️ No number found in filename '{request.filename}', using default '0'")
@@ -211,12 +229,12 @@ def generate(request: GenerateRequest):
     
     logger.debug(f"🔵 Generated network name: {nn_name}")
     
-    stedgeai = STEdgeAI(model_file=model_path, network=nn_name, output_dir=output_dir)
+    stedgeai = STEdgeAI(model_file=model_path, network=nn_name, output_dir=x_cube_ai_app)
     
     # Run stedgeai generate
     logger.debug(f"🔵 Running stedgeai generate...")
     logger.debug(f"🔵 Output will be saved to: {output_dir}")
-    success = stedgeai.generate_model()
+    #success = stedgeai.generate_model()
     
     if not success:
         logger.error(f"❌ stedgeai generation failed!")

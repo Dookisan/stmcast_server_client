@@ -7,3 +7,13 @@ def print_request_start(endpoint, method="POST"):
    
 def print_request_end(endpoint):
     print(f"✅ REQUEST END: {endpoint}")
+
+def print_ascii():
+    
+    try:
+        with open("server/utils/art.txt", "r") as f:
+            ascii_art = f.read()
+            print(ascii_art)
+
+    except FileNotFoundError:
+        print("ASCII art file not found.")
