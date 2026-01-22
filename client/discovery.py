@@ -13,6 +13,9 @@ def discover_server(timeout=DISCOVERY_TIMEOUT,retries=DISCOVERY_RETRIES):
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    # Bind to 0.0.0.0 to allow broadcasts on all interfaces
+    sock.bind(('', 0))
     sock.settimeout(timeout)
 
     request = {"action": "discover", "service": SERVICE_NAME}
@@ -74,7 +77,7 @@ def heartbeat(SERVER_URL: str):
         logger.error(f"❌ Cannot connect to server!")
         return False
         
-    except requests.exceptions. Timeout:
+    except requests.exceptions.Timeout:
         logger.error(f"❌ Server timeout!")
         return False
         

@@ -29,7 +29,9 @@ class STEdgeAI:
             "generate",
             "-m", str(self.model_file),
             "-n", self.network_name,
-            "--target", "stm32f4"
+            "--target", "stm32f4",
+            "--allocate-inputs",
+            "allocate-outputs"
         ]
         
         # Add output directory if specified

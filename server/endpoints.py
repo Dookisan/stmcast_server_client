@@ -182,7 +182,7 @@ def generate(request: GenerateRequest):
     logger.debug(f"🔵 Converting to dict...")
     data = request.model_dump()
     logger.debug(f"🔵 As dict: {data}")
-    
+      
     # Build model path
     logger.debug(f"🔵 Building model path...")
     logger.debug(f"   UPLOAD_DIR = {UPLOAD_DIR}")
@@ -202,7 +202,16 @@ def generate(request: GenerateRequest):
     
     logger.info(f"✅ File found!")
     
-    prefix = "err_seq_"
+    filename = request.filename
+    
+    if "temperature" in filename.lower():
+        prefix = "err_seq_"
+
+    elif "humidity" in filename.lower():
+        prefix = "hum_seq_"
+    else:
+        prefix = "nn_"
+    
     logger.debug(f"🔵 Extracting number from filename: {request.filename}")
     nn_number = ''.join(filter(str.isdigit, request.filename))
     logger.debug(f"🔵 Extracted number: '{nn_number}'")
@@ -234,7 +243,7 @@ def generate(request: GenerateRequest):
     # Run stedgeai generate
     logger.debug(f"🔵 Running stedgeai generate...")
     logger.debug(f"🔵 Output will be saved to: {output_dir}")
-    #success = stedgeai.generate_model()
+    success = stedgeai.generate_model()
     
     if not success:
         logger.error(f"❌ stedgeai generation failed!")

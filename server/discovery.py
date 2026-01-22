@@ -23,6 +23,7 @@ def discovery_server():
     
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)  # Enable broadcast reception
     
     # Try to enable SO_REUSEPORT if available (helps on some platforms)
     try:
@@ -36,7 +37,7 @@ def discovery_server():
     
     for port in ports_to_try:
         try:
-            sock.bind(('', port))
+            sock.bind(('', port))  # Bind to all interfaces
             discovery_port = port
             logger.info(f"✅ Discovery server bound to port {port}")
             break
@@ -46,7 +47,7 @@ def discovery_server():
                 logger.error("❌ Failed to bind to any discovery port. Discovery service unavailable.")
                 return
     
-    local_ip = get_local_ip()
+    logger.info(f"🌐 Discovery server bound and listening on port {discovery_port}")
 
     while True:
         try:
@@ -61,9 +62,19 @@ def discovery_server():
                 service = request.get('service')
 
                 if action == 'discover' and service == 'stedgeai-api':
+                    # Determine the server IP that is reachable by the client
+                    try:
+                        temp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                        temp_sock.connect((client_addr[0], 1))
+                        local_ip_for_client = temp_sock.getsockname()[0]
+                        temp_sock.close()
+                    except Exception:
+                        # Fallback to configured method if determination fails
+                        local_ip_for_client = get_local_ip()
+
                     response = {
                         'service': 'stedgeai-api',
-                        'ip': local_ip,
+                        'ip': local_ip_for_client,
                         'port': 5000
                     }
                     response_data = json.dumps(response).encode()
